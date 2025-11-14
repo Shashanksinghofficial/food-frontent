@@ -1,0 +1,157 @@
+.foodime-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Segoe UI", sans-serif;
+  z-index: 9999;
+}
+
+.signup-box {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 420px;
+}
+
+.signup-box h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.signup-box input[type="text"],
+.signup-box input[type="email"],
+.signup-box input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+.signup-box button {
+  width: 100%;
+  padding: 14px;
+  background: #ff5a5f;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.signup-box button:hover {
+  background: #e64a4f;
+}
+
+.terms {
+  display: flex;
+  align-items: flex-start;
+  font-size: 14px;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+.terms input[type="checkbox"] {
+  margin-right: 10px;
+  margin-top: 3px;
+}
+
+.terms a {
+  color: #ff5a5f;
+  text-decoration: none;
+}
+
+.login-text {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+.login-text a,
+#have-accounts {
+  color: #ff5a5f;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-text a:hover,
+#have-accounts:hover {
+  color: #e64a4f;
+  text-decoration: underline;
+  transform: scale(1.05);
+}
+
+.password-field {
+  position: relative;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  background-image: url("https://cdn-icons-png.flaticon.com/512/709/709612.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.eye-icon.visible {
+  background-image: url("https://cdn-icons-png.flaticon.com/512/709/709586.png");
+}
+
+.loader {
+  margin: 15px auto;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #ff5a5f;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.success-msg {
+  color: green;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.error-msg {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.suggestion {
+  font-size: 13px;
+  color: #555;
+  margin-top: -5px;
+  margin-bottom: 10px;
+}

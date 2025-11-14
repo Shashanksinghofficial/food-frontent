@@ -1,0 +1,169 @@
+/* src/pages/Landing.css */
+
+/* --------------------
+   Reset & Global Style
+---------------------*/
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* ❌ Scroll band rakha gaya hai kyunki background video fullscreen hai */
+  font-family: "Segoe UI", sans-serif; /* Modern clean font */
+}
+
+/* --------------------
+   Landing Page Wrapper
+---------------------*/
+.foodime-landing {
+  position: fixed; /* ✅ Full screen pe hamesha fixed */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; /* ✅ viewport cover */
+  overflow: hidden;
+  text-align: center;
+  color: white;
+  z-index: 9999; /* ✅ sabse upar show hoga */
+
+  /* Centering content */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* --------------------
+   Background Video
+---------------------*/
+.foodime-landing video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* ✅ video zoom/crop hoke screen fill karega */
+  z-index: -1; /* ✅ content ke piche rahega */
+}
+
+/* --------------------
+   Heading (Typed.js Text)
+---------------------*/
+.foodime-heading {
+  font-size: 3em;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* ✅ black shadow for readability */
+}
+
+/* --------------------
+   Get Started Button
+---------------------*/
+.btn-start {
+  background-color: #ff6600; /* 🔸 Orange button */
+  color: white;
+  padding: 15px 30px;
+  border-radius: 50px;
+  text-decoration: none !important;
+  font-size: 1.2em;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-start:hover {
+  background-color: #e65c00; /* 🔸 Darker orange on hover */
+  transform: translateY(-3px); /* 🔸 Button thoda upar lift hoga */
+}
+
+/* --------------------
+   Top-Right Business link + Social icons
+---------------------*/
+.top-right {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  gap: 18px; /* 🔸 business link aur icons ke beech spacing */
+}
+
+/* Business Link */
+.business-link {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: rgba(0, 0, 0, 0.4); /* 🔸 semi-transparent background */
+  padding: 6px 14px;
+  border-radius: 20px;
+  transition: 0.3s ease-in-out;
+}
+
+.business-link:hover {
+  background: #ff6600; /* 🔸 hover par orange ho jaye */
+  color: #fff;
+}
+
+/* Social Icons container */
+.social-icons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Social Icon button */
+.social-icons a {
+  color: #fff;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease-in-out;
+}
+
+.social-icons a:hover {
+  background: #ff6600; /* 🔸 hover par orange */
+  transform: scale(1.1) rotate(10deg); /* 🔸 zoom + rotate effect */
+}
+
+/* --------------------
+   Responsive Design
+---------------------*/
+
+/* Tablet devices */
+@media (max-width: 768px) {
+  .foodime-heading {
+    font-size: 2.2em;
+  }
+  .btn-start {
+    padding: 12px 25px;
+    font-size: 1em;
+  }
+  .top-right {
+    gap: 12px; /* 🔸 thoda kam gap */
+  }
+  .social-icons a {
+    font-size: 1rem;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 480px) {
+  .foodime-heading {
+    font-size: 1.8em;
+  }
+  .btn-start {
+    padding: 10px 20px;
+    font-size: 0.9em;
+  }
+  .top-right {
+    flex-direction: column; /* 🔸 mobile par link & icons ek ke niche ek */
+    align-items: flex-end; /* 🔸 right side me aligned */
+    gap: 8px;
+  }
+}

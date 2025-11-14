@@ -1,0 +1,30 @@
+/* src/pages/DeliveryLogin.css - Add or update these rules */
+
+/* ... (Previous CSS for .delivery-login-container, .login-card, .form-group etc.) ... */
+
+/* New styles for password eye */
+.password-group {
+  position: relative; /* To position the eye icon relative to the input */
+}
+
+.password-group input[type="text"],
+.password-group input[type="password"] {
+  padding-right: 40px; /* Make space for the icon */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 15px; /* Adjust as needed */
+  top: 60%; /* Adjust vertically to center with input */
+  transform: translateY(-50%); /* Fine-tune vertical alignment */
+  cursor: pointer;
+  color: #888;
+  font-size: 20px; /* Adjust icon size */
+  transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: #333;
+}
+
+/* ... (Rest of your existing CSS) ... */

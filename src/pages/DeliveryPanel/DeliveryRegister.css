@@ -1,0 +1,229 @@
+/* src/index.css */
+
+/* Basic reset for all elements (optional, but good practice) */
+* {
+  box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+}
+
+/* HTML and Body: Essential for page scrolling */
+html,
+body {
+  margin: 0; /* Remove default browser margins */
+  padding: 0; /* Remove default browser padding */
+
+  /* CRITICAL: Ensures the page can grow beyond the viewport height */
+  min-height: 100vh;
+
+  /* CRITICAL: Enables vertical scrolling when content overflows.
+       'auto' shows scrollbars only when needed. */
+  overflow-y: auto;
+
+  /* Prevents unwanted horizontal scrolling */
+  overflow-x: hidden;
+
+  /* Optional: Set a default font for the entire app */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6; /* Improve readability */
+  color: #333; /* Default text color */
+}
+
+/* The root element where your React app is mounted (e.g., <div id="root">) */
+#root {
+  width: 100%; /* Ensures it takes full width */
+  min-height: 100vh; /* Allows it to expand with content */
+  /* No overflow: hidden here, let the body handle overall scrolling */
+  display: flex; /* Often useful to make #root a flex container */
+  flex-direction: column; /* Stack children vertically */
+}
+
+/* Other global styles can go here */
+/* src/pages/DeliveryRegister.css */
+
+/* General container for the registration form */
+.delivery-register-container {
+  max-width: 600px; /* Maximum width for the form container */
+  margin: 40px auto; /* Centers the container horizontally with vertical margin */
+  padding: 30px; /* Inner spacing */
+  background-color: #f9f9f9; /* Light background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Modern font stack */
+  color: #333; /* Default text color */
+
+  /* min-height helps ensure the container fills enough screen space,
+       but it *can* grow taller if content requires it (thanks to 'min-' and 'vh'). */
+  min-height: 80vh;
+
+  /* Using flexbox for direct child alignment within the container */
+  display: flex;
+  flex-direction: column; /* Stacks children vertically */
+  justify-content: flex-start; /* Aligns content to the start of the container */
+  align-items: center; /* Centers items horizontally within the flex container */
+}
+
+/* Heading styles */
+.delivery-register-container h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 2.2em; /* Larger heading */
+  font-weight: 700; /* Bolder font */
+}
+
+.delivery-register-container h3 {
+  margin-top: 30px;
+  margin-bottom: 15px;
+  color: #444; /* Slightly darker for better contrast */
+  border-bottom: 1px solid #ddd; /* Soft bottom border for separation */
+  padding-bottom: 8px; /* Padding below the border */
+  font-size: 1.3em;
+}
+
+/* Form layout (flexbox for vertical stacking of form groups) */
+.delivery-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Space between form groups */
+  width: 100%; /* Ensure form takes full width of its container */
+}
+
+/* Individual form group styling */
+.form-group {
+  margin-bottom: 5px; /* Slight bottom margin */
+  width: 100%; /* Ensure form group takes full width */
+}
+
+.form-group label {
+  display: block; /* Make label a block element for stacking */
+  margin-bottom: 6px; /* Spacing below label */
+  font-weight: bold;
+  color: #444;
+  font-size: 0.95em;
+}
+
+/* Input field styling */
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="file"] {
+  width: calc(100% - 20px); /* Full width minus padding */
+  padding: 12px 10px;
+  border: 1px solid #ccc; /* Default border color */
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box; /* Important for consistent sizing */
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth transitions for focus */
+}
+
+/* Input focus styles */
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="password"]:focus,
+.form-group input[type="file"]:focus {
+  border-color: #007bff; /* Highlight border on focus */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Subtle glow */
+  outline: none; /* Remove default browser outline */
+}
+
+/* Specific adjustment for file input padding */
+.form-group input[type="file"] {
+  padding: 8px 10px;
+}
+
+/* Button styling */
+.delivery-register-form button {
+  background-color: #007bff; /* Primary blue color */
+  color: white;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions for hover */
+  margin-top: 20px;
+  width: 100%; /* Make button full width */
+}
+
+.delivery-register-form button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
+.delivery-register-form button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  transform: none; /* No lift when disabled */
+  opacity: 0.7; /* Dim disabled button */
+}
+
+/* Message styling (success/error) */
+.success-message {
+  color: #155724; /* Darker green for readability */
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.error-message {
+  color: #721c24; /* Darker red for readability */
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Link for "Already have an account?" */
+.delivery-register-container p.register-link {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.delivery-register-container p.register-link a {
+  color: #007bff; /* Link color */
+  text-decoration: none; /* No underline by default */
+}
+
+.delivery-register-container p.register-link a:hover {
+  text-decoration: underline; /* Underline on hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .delivery-register-container {
+    margin: 20px 15px; /* Slightly less margin on smaller screens */
+    padding: 20px;
+  }
+
+  .delivery-register-container h2 {
+    font-size: 1.8em; /* Adjust heading size */
+  }
+
+  .delivery-register-container h3 {
+    font-size: 1.1em; /* Adjust subheading size */
+  }
+
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group input[type="password"],
+  .form-group input[type="file"],
+  .delivery-register-form button {
+    padding: 10px; /* Slightly less padding on inputs and button */
+  }
+}
+
+@media (max-width: 480px) {
+  .delivery-register-container {
+    margin: 15px 10px; /* Even less margin on very small screens */
+    padding: 15px;
+  }
+  .delivery-register-container h2 {
+    font-size: 1.6em; /* Further adjust heading size */
+  }
+}

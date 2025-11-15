@@ -2,16 +2,15 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Plus, Minus, Trash2, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import "./ShopPage.css"; // Same CSS as ShopPage
+import "./ShopPage.css";
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toastQueue, setToastQueue] = useState([]);
-  const [updatingItemId, setUpdatingItemId] = useState(null); // for loader
+  const [updatingItemId, setUpdatingItemId] = useState(null);
   const navigate = useNavigate();
-  const jwtToken = localStorage.getItem("jwtToken");
   const debounceTimers = useRef({});
 
   // Toast helper
@@ -23,42 +22,56 @@ const CartPage = () => {
     }, 2000);
   };
 
-  // Fetch cart data
-  useEffect(() => {
-    if (!jwtToken) {
-      setError("JWT token missing. Please login.");
-      navigate("/login");
+  const fetchCart = async () => {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      setError("Please login first");
+      setLoading(false);
       return;
     }
 
-    const fetchCart = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(
-          "http://localhost/foodime/wp-json/foodime/v1/cart",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${jwtToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (!res.ok) throw new Error(`Failed to fetch cart: ${res.status}`);
-        const data = await res.json();
-        setCartItems(data.items || []);
-      } catch (err) {
-        setError(err.message || "Something went wrong.");
-      } finally {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        "http://localhost/foodime/wp-json/foodime/v1/cart",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // ✅ send JWT token
+          },
+        }
+      );
+
+      if (res.status === 403) {
+        setError("Session expired, please login again");
+        setCartItems([]);
         setLoading(false);
+        return;
       }
-    };
 
+      if (!res.ok) throw new Error(`Failed to fetch cart: ${res.status}`);
+      const data = await res.json();
+      const items = data.items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: parseFloat(item.price),
+        quantity: item.quantity,
+        image: item.image?.src || "",
+      }));
+      setCartItems(items);
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchCart();
-  }, [jwtToken, navigate]);
+  }, []);
 
-  // Update quantity with debounce
   const updateQuantity = (item, qty) => {
     if (qty < 1) return;
 
@@ -67,46 +80,62 @@ const CartPage = () => {
 
     debounceTimers.current[item.id] = setTimeout(async () => {
       setUpdatingItemId(item.id);
+      const token = localStorage.getItem("jwtToken");
       try {
         const res = await fetch(
           `http://localhost/foodime/wp-json/foodime/v1/cart/${item.id}`,
           {
             method: "PUT",
             headers: {
-              Authorization: `Bearer ${jwtToken}`,
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`, // ✅ send JWT
             },
             body: JSON.stringify({ quantity: qty }),
           }
         );
         if (!res.ok) throw new Error("Failed to update quantity");
         const updatedCart = await res.json();
-        setCartItems(updatedCart.items || []);
+        const items = updatedCart.items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: parseFloat(item.price),
+          quantity: item.quantity,
+          image: item.image?.src || "",
+        }));
+        setCartItems(items);
         showToast(`${item.name} quantity updated`);
       } catch (err) {
         showToast(err.message);
       } finally {
         setUpdatingItemId(null);
       }
-    }, 300); // 300ms debounce
+    }, 300);
   };
 
   const removeItem = async (item) => {
     setUpdatingItemId(item.id);
+    const token = localStorage.getItem("jwtToken");
     try {
       const res = await fetch(
         `http://localhost/foodime/wp-json/foodime/v1/cart/${item.id}`,
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${jwtToken}`,
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // ✅ send JWT
           },
         }
       );
       if (!res.ok) throw new Error("Failed to remove item");
       const updatedCart = await res.json();
-      setCartItems(updatedCart.items || []);
+      const items = updatedCart.items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: parseFloat(item.price),
+        quantity: item.quantity,
+        image: item.image?.src || "",
+      }));
+      setCartItems(items);
       showToast(`${item.name} removed from cart`);
     } catch (err) {
       showToast(err.message);
@@ -128,7 +157,18 @@ const CartPage = () => {
       </div>
     );
 
-  if (error) return <div className="shop-error">{error}</div>;
+  if (error)
+    return (
+      <div style={{ textAlign: "center", marginTop: 50 }}>
+        <h2>{error}</h2>
+        <button
+          onClick={() => (window.location.href = "/login")}
+          style={{ padding: 10 }}
+        >
+          Login Here →
+        </button>
+      </div>
+    );
 
   return (
     <div className="shop-page">
@@ -196,7 +236,6 @@ const CartPage = () => {
         </div>
       )}
 
-      {/* Cart Summary */}
       {cartItems.length > 0 && (
         <motion.div
           className="cart-summary"
@@ -217,7 +256,6 @@ const CartPage = () => {
         </motion.div>
       )}
 
-      {/* Toast Notifications */}
       <AnimatePresence>
         {toastQueue.map((toast) => (
           <motion.div

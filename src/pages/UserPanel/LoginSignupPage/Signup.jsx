@@ -34,14 +34,19 @@ function Signup() {
     setMessage("");
 
     try {
-      const res = await fetch(
-        "http://localhost/foodime/wp-content/plugins/foodime-plugin/src/signup.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams(form),
-        }
-      );
+      const res = await fetch("https://localhost:7284/api/auth/register", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    firstName: form.first_name,
+    lastName: form.last_name,
+    username: form.username,
+    email: form.email,
+    phone: "9876543210", // agar form me phone field nahi hai
+    password: form.password,
+  }),
+});
+
 
       const data = await res.json();
       setLoading(false);
@@ -87,6 +92,7 @@ function Signup() {
           name="first_name"
           placeholder="First Name"
           value={form.first_name}
+
           onChange={handleChange}
           required
         />

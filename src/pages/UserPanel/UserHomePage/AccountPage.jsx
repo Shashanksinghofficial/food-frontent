@@ -77,11 +77,50 @@ const MyAccount = () => {
     if (data.status === "error") alert(data.message);
     //if (data.status === "success") alert("Username updated successfully ✔");
   };
+  const uploadMedia = async () => {
+    if (!profilePic || typeof profilePic === "string") return null;
+
+    const token = localStorage.getItem("jwtToken");
+    const formData = new FormData();
+    formData.append("file", profilePic);
+    formData.append("title", fullName + " Profile Pic");
+    formData.append("alt_text", fullName);
+
+    try {
+      const res = await fetch("http://localhost/foodime/wp-json/wp/v2/media", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      console.log("MEDIA UPLOADED:", data);
+
+      if (res.ok) return data; // return media object with ID & URL
+      else {
+        alert("Media upload failed ❌: " + data.message);
+        return null;
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Media upload error ❌");
+      return null;
+    }
+  };
 
   const updateProfile = async () => {
     const token = localStorage.getItem("jwtToken");
 
-    const nameParts = fullName.trim().split(" ");
+    // Upload new image if selected
+    let mediaData = null;
+    if (profilePic && typeof profilePic !== "string") {
+      mediaData = await uploadMedia(); // returns WP media object
+    }
+
+    const safeFullName = (fullName || "").trim();
+    const nameParts = safeFullName.split(" ");
     const firstName = nameParts[0] || "";
     const lastName = nameParts.slice(1).join(" ") || "";
 
@@ -91,46 +130,34 @@ const MyAccount = () => {
       first_name: firstName,
       last_name: lastName,
       nickname: fullName,
-      email: email, // <-- FIX
+      email: email,
       meta: { custom_username: username },
+      // Use uploaded media ID as avatar
+      avatar_urls: mediaData ? { 96: mediaData.source_url } : undefined,
     };
-
-    // Handle profile picture upload separately if selected
-    if (profilePic) {
-      const formData = new FormData();
-      formData.append("file", profilePic);
-      formData.append("title", fullName + " Profile Pic");
-      formData.append("alt_text", fullName);
-
-      await fetch("http://localhost/foodime/wp-json/wp/v2/media", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-    }
 
     const res = await fetch(
       `http://localhost/foodime/wp-json/wp/v2/users/${user.id}`,
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(bodyData),
       }
     );
+
     const data = await res.json();
 
     if (res.ok) {
       await updateRealUsername();
-      await new Promise((res) => setTimeout(res, 300));
-      alert("Profile updated successfully ✔");
       await fetchUser();
       setShowEditModal(false);
+      alert("Profile updated successfully ✔");
     } else {
-      alert("Update failed ❌");
       console.log(data);
+      alert("Update failed ❌");
     }
   };
 
@@ -232,7 +259,7 @@ const MyAccount = () => {
               setFullName(user.display_name);
               setUsername(user.meta?.custom_username || user.slug);
               setEmail(user.email);
-              setProfilePic(null);
+              setProfilePic(user.avatar_urls?.["96"] || null);
               setShowEditModal(true);
             }}
           >
@@ -259,27 +286,44 @@ const MyAccount = () => {
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <h2>Edit Profile</h2>
 
+            {/* PROFILE IMAGE PREVIEW */}
+            {profilePic && (
+              <img
+                src={
+                  typeof profilePic === "string"
+                    ? profilePic // WP image (URL)
+                    : URL.createObjectURL(profilePic) // Selected file preview
+                }
+                className="preview-img"
+                alt="Profile Preview"
+              />
+            )}
+
+            {/* IMAGE PICKER */}
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setProfilePic(e.target.files[0])}
               className="input"
             />
-            {profilePic && <p>Selected: {profilePic.name}</p>}
-
             <input
+              type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Full Name"
               className="input"
             />
+
             <input
+              type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Username"
               className="input"
             />
+
             <input
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"

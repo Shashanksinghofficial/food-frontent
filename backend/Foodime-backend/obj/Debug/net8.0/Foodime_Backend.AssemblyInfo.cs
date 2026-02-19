@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Foodime_Backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4a7ceea28fc475b2afe7f898a365bb1a7bcff04f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ab1b0622d8c6d6e39c290052d8596b8d484f7e89")]
 [assembly: System.Reflection.AssemblyProductAttribute("Foodime_Backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Foodime_Backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

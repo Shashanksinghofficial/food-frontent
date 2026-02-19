@@ -35,15 +35,13 @@ Thumbs.db
 
 # ================= Backend =================
 
-# Build directories
+# Build / output directories
 backend/**/bin/
 backend/**/obj/
 
-# User-specific files
+# User-specific / temporary files
 backend/**/*.user
 backend/**/*.suo
-
-# Temporary / cache files
 backend/**/*.cache
 
 # Logs
@@ -51,7 +49,3 @@ backend/**/*.log
 
 # VS specific
 backend/**/*.vs/
-
-# Backend build/output
-/backend/Foodime-backend/bin/
-/backend/Foodime-backend/obj/

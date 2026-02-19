@@ -51,3 +51,7 @@ backend/**/*.log
 
 # VS specific
 backend/**/*.vs/
+
+# Backend build/output
+/backend/Foodime-backend/bin/
+/backend/Foodime-backend/obj/

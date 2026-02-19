@@ -18,7 +18,7 @@ namespace Foodime_Backend.Models
         public required string PasswordHash { get; set; }
 
         public required string Role { get; set; } // Customer, Vendor, DeliveryBoy, Admin
-
+            
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;

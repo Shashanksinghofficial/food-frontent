@@ -40,6 +40,7 @@ const ShopPage = () => {
   const activeCategoryFromURL = searchParams.get("category") || "all";
   const [activeCategory, setActiveCategory] = useState(activeCategoryFromURL);
 
+  // Update URL param on category change
   useEffect(() => {
     if (activeCategory === "all") {
       searchParams.delete("category");
@@ -49,30 +50,30 @@ const ShopPage = () => {
     setSearchParams(searchParams);
   }, [activeCategory, searchParams, setSearchParams]);
 
+  // Load wishlist from localStorage
   useEffect(() => {
     const savedWishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
     setWishlist(savedWishlist);
   }, []);
 
+  // Save wishlist to localStorage on change
   useEffect(() => {
     localStorage.setItem("wishlist", JSON.stringify(wishlist));
   }, [wishlist]);
 
+  // Fetch categories from API
   useEffect(() => {
     if (!jwtToken) return;
 
     const fetchCategories = async () => {
       try {
-        const res = await fetch(
-          "http://localhost/foodime/wp-json/foodime/v1/categories",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${jwtToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const res = await fetch("", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!res.ok) throw new Error("Failed to fetch categories");
 
@@ -90,6 +91,7 @@ const ShopPage = () => {
     fetchCategories();
   }, [jwtToken]);
 
+  // Fetch products from API
   useEffect(() => {
     if (!jwtToken) {
       setError("Missing JWT Token. Please login again.");
@@ -103,7 +105,7 @@ const ShopPage = () => {
       setError(null);
 
       try {
-        let url = "http://localhost/foodime/wp-json/foodime/v1/products";
+        let url = "";
         if (activeCategory && activeCategory !== "all") {
           url += `?category=${activeCategory}`;
         }
@@ -137,6 +139,7 @@ const ShopPage = () => {
     fetchProducts();
   }, [jwtToken, navigate, activeCategory]);
 
+  // Wishlist toggle
   const toggleWishlist = (product) => {
     if (wishlist.includes(product.id)) {
       setWishlist(wishlist.filter((id) => id !== product.id));
@@ -147,6 +150,7 @@ const ShopPage = () => {
     }
   };
 
+  // Generic toast
   const showToast = (msg, type = "black") => {
     const id = Date.now();
     setToastQueue((prev) => [...prev, { id, msg, type }]);
@@ -155,11 +159,13 @@ const ShopPage = () => {
     }, 2000);
   };
 
+  // Cart summary toast
   const showCartSummary = (message) => {
     setCartToast({ show: true, message });
     setTimeout(() => setCartToast({ show: false, message: "" }), 7000);
   };
 
+  // Add product to cart
   const addToCart = (product) => {
     setCart((prev) => ({
       ...prev,
@@ -168,6 +174,7 @@ const ShopPage = () => {
     showCartSummary(`${product.name} added to cart`);
   };
 
+  // Remove product from cart
   const removeFromCart = (product) => {
     setCart((prev) => {
       if (!prev[product.id]) return prev;
@@ -242,10 +249,7 @@ const ShopPage = () => {
       <div className="products-grid">
         <AnimatePresence>
           {products
-            // 🔹 Search filter
             .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-
-            // 🔹 Price filter
             .filter((p) => {
               const price = parseFloat(p.price) || 0;
               return (
@@ -253,17 +257,13 @@ const ShopPage = () => {
                 price <= selectedFilters.price[1]
               );
             })
-
-            // 🔹 Rating filter
             .filter((p) => {
-              if (selectedFilters.rating.length === 0) return true; // agar koi rating select hi nhi hai
+              if (selectedFilters.rating.length === 0) return true;
               const avgRating = parseFloat(p.average_rating) || 0;
               return selectedFilters.rating.some(
-                (r) => Math.floor(avgRating) === r
+                (r) => Math.floor(avgRating) === r,
               );
             })
-
-            // 🔹 Render
             .map((product) => (
               <motion.div
                 key={product.id}
@@ -273,7 +273,7 @@ const ShopPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
-                onClick={() => navigate(`/product/${product.id}`)} // ← Yaha add kiya
+                onClick={() => navigate(`/product/${product.id}`)}
               >
                 {product.images && product.images.length > 0 && (
                   <motion.img
@@ -290,7 +290,7 @@ const ShopPage = () => {
                     wishlist.includes(product.id) ? "active" : ""
                   }`}
                   onClick={(e) => {
-                    e.stopPropagation(); // card click ko rokta hai
+                    e.stopPropagation();
                     toggleWishlist(product);
                   }}
                 >
@@ -315,7 +315,7 @@ const ShopPage = () => {
                       >
                         <button
                           onClick={(e) => {
-                            e.stopPropagation(); // card click ko rokta hai
+                            e.stopPropagation();
                             removeFromCart(product);
                           }}
                         >
@@ -324,7 +324,7 @@ const ShopPage = () => {
                         <span>{cart[product.id]}</span>
                         <button
                           onClick={(e) => {
-                            e.stopPropagation(); // card click ko rokta hai
+                            e.stopPropagation();
                             addToCart(product);
                           }}
                         >
@@ -335,7 +335,7 @@ const ShopPage = () => {
                       <motion.button
                         className="add-btn"
                         onClick={(e) => {
-                          e.stopPropagation(); // card click ko rokta hai
+                          e.stopPropagation();
                           addToCart(product);
                         }}
                         whileTap={{ scale: 0.9 }}
@@ -372,7 +372,6 @@ const ShopPage = () => {
                 </button>
               </div>
 
-              {/* Price Range */}
               <div className="filter-section">
                 <h4>Price Range</h4>
                 <input
@@ -410,7 +409,6 @@ const ShopPage = () => {
                 </div>
               </div>
 
-              {/* Ratings */}
               <div className="filter-section">
                 <h4>Ratings</h4>
                 {availableRatings.map((r) => (
@@ -432,7 +430,6 @@ const ShopPage = () => {
                 ))}
               </div>
 
-              {/* Buttons */}
               <div className="filter-actions">
                 <button
                   className="clear-btn"
@@ -457,7 +454,7 @@ const ShopPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Cart summary as toast */}
+      {/* Cart summary toast */}
       <AnimatePresence>
         {cartToast.show && (
           <motion.div
@@ -476,7 +473,7 @@ const ShopPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Toast Notifications */}
+      {/* Toast notifications */}
       <AnimatePresence>
         {toastQueue.map((toast) => (
           <motion.div

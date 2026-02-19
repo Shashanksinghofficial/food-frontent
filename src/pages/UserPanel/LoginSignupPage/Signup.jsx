@@ -4,11 +4,12 @@ import "./Signup.css";
 
 function Signup() {
   const [form, setForm] = useState({
-    first_name: "",
-    last_name: "",
-    username: "",
-    email: "",
-    password: "",
+    FirstName: "",
+    LastName: "",
+    Username: "",
+    Email: "",
+    Phone: "",
+    Password: "",
     confirm_password: "",
     terms: false,
   });
@@ -18,58 +19,81 @@ function Signup() {
   const [usernameSuggestion, setUsernameSuggestion] = useState("");
   const navigate = useNavigate();
 
+  // Prevent page scroll when modal is open
+  React.useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  // Handle form input change
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+
+    // Optional automatic suggestion for UX
+    if (name === "Username" && value.trim().length < 4) {
+      const suggestion =
+        form.FirstName.toLowerCase() +
+        Math.floor(Math.random() * 1000).toString();
+      setUsernameSuggestion(suggestion);
+    } else if (name === "Username") {
+      setUsernameSuggestion("");
+    }
   };
 
+  // Toggle password visibility
   const toggleVisibility = (id) => {
     const input = document.getElementById(id);
     input.type = input.type === "password" ? "text" : "password";
   };
 
+  // Submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setMessage("");
 
-    try {
-      const res = await fetch("https://localhost:7284/api/auth/register", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    firstName: form.first_name,
-    lastName: form.last_name,
-    username: form.username,
-    email: form.email,
-    phone: "9876543210", // agar form me phone field nahi hai
-    password: form.password,
-  }),
-});
+    if (form.Password !== form.confirm_password) {
+      setMessage("❌ Password and Confirm Password do not match.");
+      return;
+    }
 
+    if (!form.terms) {
+      setMessage("❌ You must agree to the Terms & Conditions.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:5206/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          FirstName: form.FirstName.trim(),
+          LastName: form.LastName.trim(),
+          Username: form.Username.trim(),
+          Email: form.Email.trim(),
+          Phone: form.Phone.trim(),
+          Password: form.Password,
+        }),
+      });
 
       const data = await res.json();
       setLoading(false);
 
-      if (data.success) {
-        setMessage("✅ Signup successful! Redirecting to login...");
-        setTimeout(() => navigate("/login"), 2000);
-      } else {
-        if (data.error === "email_exists") {
-          setMessage("❌ Email already registered");
-        } else if (data.error === "username_exists") {
-          setMessage("❌ Username already taken, try suggestion below");
-          if (data.suggestion) {
-            setUsernameSuggestion(data.suggestion);
-            setForm({ ...form, username: data.suggestion }); // ✅ Auto-fill suggestion
-          }
-        } else {
-          setMessage(data.data?.join(", ") || "❌ Signup failed");
-        }
+      if (!res.ok) {
+        if (data.suggestion) setUsernameSuggestion(data.suggestion);
+        setMessage(`❌ ${data.message}`);
+        return;
       }
+
+      setMessage("✅ Signup successful! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       setLoading(false);
-      setMessage("❌ Network error. Please try again.");
+      setMessage("❌ Network error. Please try again later.");
     }
   };
 
@@ -77,6 +101,7 @@ function Signup() {
     <div className="foodime-fullscreen">
       <form className="signup-box" onSubmit={handleSubmit}>
         <h2>Create Your Account</h2>
+
         {message && (
           <p
             className={
@@ -89,42 +114,69 @@ function Signup() {
 
         <input
           type="text"
-          name="first_name"
+          name="FirstName"
           placeholder="First Name"
-          value={form.first_name}
-
+          value={form.FirstName}
           onChange={handleChange}
           required
         />
 
         <input
           type="text"
-          name="last_name"
+          name="LastName"
           placeholder="Last Name"
-          value={form.last_name}
+          value={form.LastName}
           onChange={handleChange}
           required
         />
 
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={form.username}
-          onChange={handleChange}
-          required
-        />
-        {usernameSuggestion && (
-          <p className="suggestion">
-            Suggested: <strong>{usernameSuggestion}</strong>
-          </p>
-        )}
+        <div style={{ position: "relative" }}>
+          <input
+            type="text"
+            name="Username"
+            placeholder="Username"
+            value={form.Username}
+            onChange={handleChange}
+            required
+          />
+          {usernameSuggestion && (
+            <div className="username-suggestion-dropdown">
+              <p>Select a suggested username:</p>
+              <ul>
+                {[
+                  usernameSuggestion,
+                  usernameSuggestion + "99",
+                  usernameSuggestion + "88",
+                ].map((sugg, idx) => (
+                  <li
+                    key={idx}
+                    onClick={() => {
+                      setForm({ ...form, Username: sugg });
+                      setUsernameSuggestion(""); // hide dropdown
+                    }}
+                  >
+                    {sugg}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
 
         <input
           type="email"
-          name="email"
+          name="Email"
           placeholder="Email Address"
-          value={form.email}
+          value={form.Email}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          type="text"
+          name="Phone"
+          placeholder="Phone Number"
+          value={form.Phone || ""}
           onChange={handleChange}
           required
         />
@@ -133,9 +185,9 @@ function Signup() {
           <input
             type="password"
             id="password"
-            name="password"
+            name="Password"
             placeholder="Create Password"
-            value={form.password}
+            value={form.Password}
             onChange={handleChange}
             required
           />
@@ -178,11 +230,9 @@ function Signup() {
           </span>
         </label>
 
-        {loading ? (
-          <div className="loader" />
-        ) : (
-          <button type="submit">Sign Up</button>
-        )}
+        <button type="submit" disabled={loading}>
+          {loading ? "Signing up..." : "Sign Up"}
+        </button>
 
         <p className="auth-link">
           Already have an account?{" "}

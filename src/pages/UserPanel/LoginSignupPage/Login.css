@@ -99,3 +99,53 @@ body {
     transform: rotate(360deg);
   }
 }
+.password-container {
+  display: flex;
+  flex-direction: column; /* stack input and forgot link */
+  margin-bottom: 10px; /* reduce gap below password */
+}
+
+.password-field {
+  position: relative;
+  width: 100%;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 40px; /* space for eye icon */
+  padding-top: 12px;
+  padding-bottom: 12px; /* ensure vertical height same */
+  box-sizing: border-box;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%); /* center vertically */
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  background-image: url("https://cdn-icons-png.flaticon.com/512/709/709612.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.eye-icon.visible {
+  background-image: url("https://cdn-icons-png.flaticon.com/512/709/709586.png");
+}
+
+.forgot-password {
+  font-size: 13px;
+  color: #ff5a5f;
+  cursor: pointer;
+  align-self: flex-end; /* move to right */
+  margin-top: 4px; /* smaller gap under input */
+  transition: all 0.2s ease;
+}
+
+.forgot-password:hover {
+  color: #e64a4f;
+  text-decoration: underline;
+  transform: scale(1.05);
+}

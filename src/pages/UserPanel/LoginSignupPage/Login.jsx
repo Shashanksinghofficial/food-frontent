@@ -15,14 +15,14 @@ function Login() {
     setMsg("");
 
     try {
-      const res = await fetch(
-        "http://localhost/foodime/wp-json/jwt-auth/v1/token",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        }
-      );
+      const res = await fetch("http://localhost:5206/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          EmailOrUsername: username,
+          Password: password,
+        }),
+      });
 
       const data = await res.json();
       setLoading(false);
@@ -54,13 +54,34 @@ function Login() {
             placeholder="Email or Username"
             required
           />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            required
-          />
+          <div className="password-container">
+            <div className="password-field">
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+              />
+              <i
+                className="eye-icon"
+                onClick={() =>
+                  document.getElementById("password").type === "password"
+                    ? (document.getElementById("password").type = "text")
+                    : (document.getElementById("password").type = "password")
+                }
+              />
+            </div>
+
+            <span
+              className="forgot-password"
+              onClick={() => navigate("/forget-password")}
+            >
+              Forgot?
+            </span>
+          </div>
+
           {loading ? (
             <div className="loader" />
           ) : (

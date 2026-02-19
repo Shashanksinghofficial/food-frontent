@@ -14,7 +14,10 @@ import Login from "./pages/UserPanel/LoginSignupPage/Login";
 import ShopPage from "./pages/UserPanel/UserHomePage/ShopPage";
 import CartPage from "./pages/UserPanel/UserHomePage/CartPage";
 import AccountPage from "./pages/UserPanel/UserHomePage/AccountPage";
-import ProductDetail from "./pages/UserPanel/ProductPage/ProductDetail"; // ✅ fixed
+import ProductDetail from "./pages/UserPanel/ProductPage/ProductDetail";
+
+// Password Reset Page
+import ForgetPassword from "./pages/UserPanel/PasswordReset/ForgetPassword";
 
 // Delivery Panel Pages
 import DeliveryLogin from "./pages/DeliveryPanel/DeliveryLogin";
@@ -36,16 +39,18 @@ function App() {
       <Route path="/delivery-login" element={<DeliveryLogin />} />
       <Route path="/delivery-register" element={<DeliveryRegister />} />
 
-      {/* 2. Routes with Layout (Header + Footer) */}
+      {/* 2. Password Reset Route */}
+      <Route path="/forget-password" element={<ForgetPassword />} />
+
+      {/* 3. Routes with Layout (Header + Footer) */}
       <Route element={<Layout />}>
         <Route path="/homepage" element={<ShopPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/account" element={<AccountPage />} />
-        <Route path="/product/:id" element={<ProductDetail />} />{" "}
-        {/* ✅ Added */}
+        <Route path="/product/:id" element={<ProductDetail />} />
       </Route>
 
-      {/* 3. Delivery Panel Route (authenticated only) */}
+      {/* 4. Delivery Panel Route (authenticated only) */}
       <Route
         path="/delivery-panel"
         element={
@@ -57,7 +62,7 @@ function App() {
         }
       />
 
-      {/* 4. Catch-all route */}
+      {/* 5. Catch-all route */}
       <Route path="*" element={<div>404 - Page Not Found (Foodime App)</div>} />
     </Routes>
   );

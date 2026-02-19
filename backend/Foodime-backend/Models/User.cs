@@ -27,6 +27,6 @@ namespace Foodime_Backend.Models
         public string? ForgotPasswordOtp { get; set; }             // OTP code
         public DateTime? OtpGeneratedAt { get; set; }             // OTP generation time
         public string? PasswordResetToken { get; set; }           // Reset token
-        public DateTime? PasswordResetTokenExpiry { get; set; }   // Token expiry
+        public DateTime? PasswordResetTokenExpiry { get; set; }   // Token expiry code
     }
 }

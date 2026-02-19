@@ -4237,11 +4237,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "G:\\Foodime\\Foodime-backend\\Foodime-backend\\Foodime_Backend.csproj",
+      "projectUniqueName": "G:\\Foodime\\Foodime-frontent\\backend\\Foodime-backend\\Foodime_Backend.csproj",
       "projectName": "Foodime_Backend",
-      "projectPath": "G:\\Foodime\\Foodime-backend\\Foodime-backend\\Foodime_Backend.csproj",
+      "projectPath": "G:\\Foodime\\Foodime-frontent\\backend\\Foodime-backend\\Foodime_Backend.csproj",
       "packagesPath": "C:\\Users\\Ankit.LAPTOP-UK7RH0NU\\.nuget\\packages\\",
-      "outputPath": "G:\\Foodime\\Foodime-backend\\Foodime-backend\\obj\\",
+      "outputPath": "G:\\Foodime\\Foodime-frontent\\backend\\Foodime-backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -33,7 +33,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// ✅ CORS
+// ✅ CORS (unchanged as you requested)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactPolicy", policy =>
@@ -60,9 +60,11 @@ if (app.Environment.IsDevelopment())
 app.UseCors("ReactPolicy");
 
 // ✅ IMPORTANT ORDER
-app.UseAuthentication();  // MUST come before Authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+// ✅ Render PORT FIX (only required change)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Run($"http://0.0.0.0:{port}");

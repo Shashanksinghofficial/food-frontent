@@ -27,13 +27,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
     });
 
 builder.Services.AddAuthorization();
 
-// ✅ CORS (unchanged as you requested)
+// ✅ CORS (unchanged)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactPolicy", policy =>
@@ -48,12 +48,11 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+// ✅ Swagger enabled in all environments
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 // ❌ HTTPS redirection disabled for localhost React
 // app.UseHttpsRedirection();
 
@@ -64,7 +63,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
-// ✅ Render PORT FIX (only required change)
+// ✅ Render PORT FIX (unchanged)
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Run($"http://0.0.0.0:{port}");

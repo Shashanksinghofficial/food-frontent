@@ -6,6 +6,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ----------------- Services -----------------
+
 // Controllers
 builder.Services.AddControllers();
 
@@ -14,7 +16,7 @@ builder.Services.AddDbContext<FoodimeDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// ✅ JWT Authentication
+// JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -31,13 +33,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
-
-// ✅ CORS (unchanged)
+// CORS (Allow only frontend)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactPolicy", policy =>
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("https://foodime.vercel.app") // Vercel frontend
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
@@ -46,25 +46,31 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// ----------------- App -----------------
+
 var app = builder.Build();
 
-// ✅ Swagger enabled in all environments
+// Swagger (enabled in all envs)
 app.UseSwagger();
 app.UseSwaggerUI();
+
+// Static files (optional, for local testing)
 app.UseDefaultFiles();
 app.UseStaticFiles();
-// ❌ HTTPS redirection disabled for localhost React
-// app.UseHttpsRedirection();
 
+// CORS
 app.UseCors("ReactPolicy");
 
-// ✅ IMPORTANT ORDER
+// Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Controllers
 app.MapControllers();
+
+// Fallback (optional, only if serving frontend from backend)
 app.MapFallbackToFile("index.html");
 
-// ✅ Render PORT FIX (unchanged)
+// Render PORT
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Run($"http://0.0.0.0:{port}");

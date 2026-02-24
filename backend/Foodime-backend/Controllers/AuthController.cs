@@ -95,14 +95,25 @@ namespace Foodime_Backend.Controllers
                 new Claim(ClaimTypes.Role, user.Role)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var jwtKey = _configuration.GetValue<string>("Jwt:Key")
+              ?? throw new InvalidOperationException("JWT Key not configured");
+
+            var issuer = _configuration.GetValue<string>("Jwt:Issuer")
+                         ?? throw new InvalidOperationException("JWT Issuer not configured");
+
+            var audience = _configuration.GetValue<string>("Jwt:Audience")
+                         ?? throw new InvalidOperationException("JWT Audience not configured");
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtKey));
+
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: issuer,
+                audience: audience,
                 claims: claims,
-                expires: DateTime.Now.AddHours(3),
+                expires: DateTime.UtcNow.AddHours(3),
                 signingCredentials: creds
             );
 

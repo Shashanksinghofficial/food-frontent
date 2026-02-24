@@ -33,16 +33,13 @@ const CartPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(
-        "http://localhost/foodime/wp-json/foodime/v1/cart",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // ✅ send JWT token
-          },
-        }
-      );
+      const res = await fetch("http://localhost:5206/api/cart", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ send JWT token
+        },
+      });
 
       if (res.status === 403) {
         setError("Session expired, please login again");
@@ -53,6 +50,12 @@ const CartPage = () => {
 
       if (!res.ok) throw new Error(`Failed to fetch cart: ${res.status}`);
       const data = await res.json();
+
+      if (!data || !Array.isArray(data.items)) {
+        setCartItems([]);
+        return;
+      }
+
       const items = data.items.map((item) => ({
         id: item.id,
         name: item.name,
@@ -60,6 +63,7 @@ const CartPage = () => {
         quantity: item.quantity,
         image: item.image?.src || "",
       }));
+
       setCartItems(items);
     } catch (err) {
       setError(err.message || "Something went wrong.");
@@ -82,17 +86,14 @@ const CartPage = () => {
       setUpdatingItemId(item.id);
       const token = localStorage.getItem("jwtToken");
       try {
-        const res = await fetch(
-          `http://localhost/foodime/wp-json/foodime/v1/cart/${item.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`, // ✅ send JWT
-            },
-            body: JSON.stringify({ quantity: qty }),
-          }
-        );
+        const res = await fetch(`http://localhost:5206/api/cart/${item.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // ✅ send JWT
+          },
+          body: JSON.stringify({ quantity: qty }),
+        });
         if (!res.ok) throw new Error("Failed to update quantity");
         const updatedCart = await res.json();
         const items = updatedCart.items.map((item) => ({
@@ -116,16 +117,13 @@ const CartPage = () => {
     setUpdatingItemId(item.id);
     const token = localStorage.getItem("jwtToken");
     try {
-      const res = await fetch(
-        `http://localhost/foodime/wp-json/foodime/v1/cart/${item.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // ✅ send JWT
-          },
-        }
-      );
+      const res = await fetch(`http://localhost:5206/api/cart/${item.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ send JWT
+        },
+      });
       if (!res.ok) throw new Error("Failed to remove item");
       const updatedCart = await res.json();
       const items = updatedCart.items.map((item) => ({

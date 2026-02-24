@@ -5,7 +5,7 @@ import "./Layout.css";
 
 const Layout = () => {
   const [address, setAddress] = useState(
-    "Mahatma Gandhi Road, Shahganj, Agra, Uttar Pradesh, 282002, India"
+    "Your Location is fetching , please wait...",
   );
   const [coordinates, setCoordinates] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -30,12 +30,12 @@ const Layout = () => {
       if (topBarRef.current)
         document.documentElement.style.setProperty(
           "--top-bar-height",
-          `${topBarRef.current.offsetHeight}px`
+          `${topBarRef.current.offsetHeight}px`,
         );
       if (footerNavRef.current)
         document.documentElement.style.setProperty(
           "--footer-nav-height",
-          `${footerNavRef.current.offsetHeight}px`
+          `${footerNavRef.current.offsetHeight}px`,
         );
     };
     setDynamicHeights();
@@ -52,7 +52,12 @@ const Layout = () => {
             lat: pos.coords.latitude,
             lon: pos.coords.longitude,
           }),
-        (err) => console.warn("Geolocation not allowed", err)
+        (err) => console.warn("Geolocation not allowed", err),
+        {
+          enableHighAccuracy: true, // 🔥 IMPORTANT
+          timeout: 10000,
+          maximumAge: 0,
+        },
       );
     }
   }, []);
@@ -63,18 +68,36 @@ const Layout = () => {
       const fetchAddress = async () => {
         try {
           const res = await fetch(
-            `http://localhost/foodime/wp-content/plugins/foodime-plugin/location-proxy.php?lat=${coordinates.lat}&lon=${coordinates.lon}`
+            `http://localhost:5206/api/location/reverse?lat=${coordinates.lat}&lon=${coordinates.lon}`,
           );
+
           const data = await res.json();
-          if (!data.error) {
-            setAddress(data.display_name || "Address not found");
+
+          if (data && data.address) {
+            const a = data.address;
+
+            const fullAddress = [
+              a.house_number,
+              a.road,
+              a.neighbourhood || a.suburb,
+              a.city || a.town || a.village,
+              a.state,
+              a.postcode,
+              a.country,
+            ]
+              .filter(Boolean)
+              .join(", ");
+
+            setAddress(fullAddress);
           } else {
-            console.warn("Error fetching address:", data.message);
+            setAddress("Address not found");
           }
         } catch (err) {
           console.error("Failed to fetch address:", err);
+          setAddress("Unable to fetch address");
         }
       };
+
       fetchAddress();
     }
   }, [coordinates]);

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./ShopPage.css";
-
+const API_BASE = "http://localhost:5206/api";
 const ShopPage = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({});
@@ -67,7 +67,7 @@ const ShopPage = () => {
 
     const fetchCategories = async () => {
       try {
-        const res = await fetch("", {
+        const res = await fetch(`${API_BASE}/categories`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${jwtToken}`,
@@ -78,16 +78,17 @@ const ShopPage = () => {
         if (!res.ok) throw new Error("Failed to fetch categories");
 
         const data = await res.json();
+
         const catData = data.map((c) => ({
-          name: c.name.trim(),
+          name: c.name?.trim() || "",
           slug: c.slug,
         }));
+
         setCategories([{ name: "All", slug: "all" }, ...catData]);
       } catch (err) {
         console.error("Category fetch error:", err);
       }
     };
-
     fetchCategories();
   }, [jwtToken]);
 
@@ -105,7 +106,8 @@ const ShopPage = () => {
       setError(null);
 
       try {
-        let url = "";
+        let url = `${API_BASE}/products`;
+
         if (activeCategory && activeCategory !== "all") {
           url += `?category=${activeCategory}`;
         }
@@ -125,7 +127,9 @@ const ShopPage = () => {
           return;
         }
 
-        if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch products: ${res.status}`);
+        }
 
         const data = await res.json();
         setProducts(data);
@@ -275,9 +279,9 @@ const ShopPage = () => {
                 exit={{ opacity: 0, y: 20 }}
                 onClick={() => navigate(`/product/${product.id}`)}
               >
-                {product.images && product.images.length > 0 && (
+                {product.imageUrl && (
                   <motion.img
-                    src={product.images[0].src}
+                    src={product.imageUrl}
                     alt={product.name}
                     className="product-image"
                     whileHover={{ scale: 1.1 }}

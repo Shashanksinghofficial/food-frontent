@@ -170,14 +170,29 @@ const ShopPage = () => {
   };
 
   // Add product to cart
-  const addToCart = (product) => {
-    setCart((prev) => ({
-      ...prev,
-      [product.id]: (prev[product.id] || 0) + 1,
-    }));
-    showCartSummary(`${product.name} added to cart`);
-  };
+  const addToCart = async (product) => {
+    const token = localStorage.getItem("jwtToken");
 
+    try {
+      const res = await fetch(`http://localhost:5206/api/cart`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          productId: product.id,
+          quantity: 1,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to add to cart");
+
+      showCartSummary(`${product.name} added to cart`);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
   // Remove product from cart
   const removeFromCart = (product) => {
     setCart((prev) => {
@@ -234,9 +249,9 @@ const ShopPage = () => {
 
       {/* Categories filter */}
       <div className="categories-filter">
-        {categories.map((cat) => (
+        {categories.map((cat, index) => (
           <button
-            key={cat.slug}
+            key={`cat-${cat.slug || index}`}
             className={`category-btn ${
               activeCategory === cat.slug ? "active" : ""
             }`}
@@ -415,8 +430,8 @@ const ShopPage = () => {
 
               <div className="filter-section">
                 <h4>Ratings</h4>
-                {availableRatings.map((r) => (
-                  <label key={r}>
+                {availableRatings.map((r, index) => (
+                  <label key={`rating-${r}-${index}`}>
                     <input
                       type="checkbox"
                       checked={selectedFilters.rating.includes(r)}

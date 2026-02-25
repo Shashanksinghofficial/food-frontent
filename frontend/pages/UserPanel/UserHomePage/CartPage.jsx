@@ -51,17 +51,17 @@ const CartPage = () => {
       if (!res.ok) throw new Error(`Failed to fetch cart: ${res.status}`);
       const data = await res.json();
 
-      if (!data || !Array.isArray(data.items)) {
+      if (!data || !Array.isArray(data)) {
         setCartItems([]);
         return;
       }
 
-      const items = data.items.map((item) => ({
+      const items = data.map((item) => ({
         id: item.id,
         name: item.name,
         price: parseFloat(item.price),
         quantity: item.quantity,
-        image: item.image?.src || "",
+        image: item.image || "",
       }));
 
       setCartItems(items);
@@ -79,61 +79,59 @@ const CartPage = () => {
   const updateQuantity = (item, qty) => {
     if (qty < 1) return;
 
+    // ✅ 1. Instantly update UI
+    setCartItems((prev) =>
+      prev.map((cartItem) =>
+        cartItem.id === item.id ? { ...cartItem, quantity: qty } : cartItem,
+      ),
+    );
+
     if (debounceTimers.current[item.id])
       clearTimeout(debounceTimers.current[item.id]);
 
     debounceTimers.current[item.id] = setTimeout(async () => {
       setUpdatingItemId(item.id);
       const token = localStorage.getItem("jwtToken");
+
       try {
         const res = await fetch(`http://localhost:5206/api/cart/${item.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // ✅ send JWT
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ quantity: qty }),
         });
+
         if (!res.ok) throw new Error("Failed to update quantity");
-        const updatedCart = await res.json();
-        const items = updatedCart.items.map((item) => ({
-          id: item.id,
-          name: item.name,
-          price: parseFloat(item.price),
-          quantity: item.quantity,
-          image: item.image?.src || "",
-        }));
-        setCartItems(items);
+
         showToast(`${item.name} quantity updated`);
       } catch (err) {
         showToast(err.message);
+
+        // ❌ If API fails, rollback
+        fetchCart();
       } finally {
         setUpdatingItemId(null);
       }
     }, 300);
   };
-
   const removeItem = async (item) => {
     setUpdatingItemId(item.id);
     const token = localStorage.getItem("jwtToken");
+
     try {
       const res = await fetch(`http://localhost:5206/api/cart/${item.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ✅ send JWT
+          Authorization: `Bearer ${token}`,
         },
       });
+
       if (!res.ok) throw new Error("Failed to remove item");
-      const updatedCart = await res.json();
-      const items = updatedCart.items.map((item) => ({
-        id: item.id,
-        name: item.name,
-        price: parseFloat(item.price),
-        quantity: item.quantity,
-        image: item.image?.src || "",
-      }));
-      setCartItems(items);
+
+      await fetchCart(); // ✅ REFRESH CART
       showToast(`${item.name} removed from cart`);
     } catch (err) {
       showToast(err.message);

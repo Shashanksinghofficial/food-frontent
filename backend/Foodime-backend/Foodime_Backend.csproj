@@ -8,6 +8,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DTOs\NewFolder1\**" />
+    <Compile Remove="DTOs\NewFolder3\**" />
+    <Content Remove="DTOs\NewFolder1\**" />
+    <Content Remove="DTOs\NewFolder3\**" />
+    <EmbeddedResource Remove="DTOs\NewFolder1\**" />
+    <EmbeddedResource Remove="DTOs\NewFolder3\**" />
+    <None Remove="DTOs\NewFolder1\**" />
+    <None Remove="DTOs\NewFolder3\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />

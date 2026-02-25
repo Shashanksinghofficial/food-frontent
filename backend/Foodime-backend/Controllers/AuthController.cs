@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
+using static Foodime_Backend.Models.User;
 
 namespace Foodime_Backend.Controllers
 {
@@ -61,7 +62,7 @@ namespace Foodime_Backend.Controllers
                 Email = email,
                 Phone = phone,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                Role = "Customer"
+                Role = UserRole.Admin
             };
 
             _context.Users.Add(user);
@@ -89,12 +90,11 @@ namespace Foodime_Backend.Controllers
                 return Unauthorized(new { success = false, message = "Invalid password" });
 
             var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role)
-            };
-
+{
+    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+    new Claim(ClaimTypes.Name, user.Username),
+    new Claim(ClaimTypes.Role, user.Role.ToString())
+};
             var jwtKey = _configuration.GetValue<string>("Jwt:Key")
               ?? throw new InvalidOperationException("JWT Key not configured");
 

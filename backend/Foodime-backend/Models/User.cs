@@ -17,11 +17,17 @@ namespace Foodime_Backend.Models
 
         public required string PasswordHash { get; set; }
 
-        public required string Role { get; set; } // Customer, Vendor, DeliveryBoy, Admin
-            
+        public enum UserRole
+        {
+            Customer,
+            Vendor,
+            DeliveryBoy,
+            Admin
+        }
+        public required UserRole Role { get; set; }
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // ================= FORGOT PASSWORD / RESET =================
         public string? ForgotPasswordOtp { get; set; }             // OTP code

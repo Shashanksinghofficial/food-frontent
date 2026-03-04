@@ -9,6 +9,7 @@ function Signup() {
     Username: "",
     Email: "",
     Phone: "",
+    Role: "Customer",
     Password: "",
     confirm_password: "",
     terms: false,
@@ -76,6 +77,7 @@ function Signup() {
           Username: form.Username.trim(),
           Email: form.Email.trim(),
           Phone: form.Phone.trim(),
+          Role: form.Role,
           Password: form.Password,
         }),
       });
@@ -180,7 +182,18 @@ function Signup() {
           onChange={handleChange}
           required
         />
-
+        <div className="role-field">
+          <select
+            name="Role"
+            value={form.Role}
+            onChange={handleChange}
+            required
+          >
+            <option value="Customer">Customer</option>
+            <option value="Vendor">Vendor</option>
+            <option value="DeliveryBoy">Delivery Boy</option>
+          </select>
+        </div>
         <div className="password-field">
           <input
             type="password"

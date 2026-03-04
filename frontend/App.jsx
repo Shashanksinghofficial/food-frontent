@@ -15,6 +15,7 @@ import ShopPage from "./pages/UserPanel/UserHomePage/ShopPage";
 import CartPage from "./pages/UserPanel/UserHomePage/CartPage";
 import AccountPage from "./pages/UserPanel/UserHomePage/AccountPage";
 import ProductDetail from "./pages/UserPanel/ProductPage/ProductDetail";
+import WishlistPage from "./pages/UserPanel/MyAccount/WishlistPage";
 
 // Password Reset Page
 import ForgetPassword from "./pages/UserPanel/PasswordReset/ForgetPassword";
@@ -48,6 +49,7 @@ function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/account" element={<AccountPage />} />
         <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
       </Route>
 
       {/* 4. Delivery Panel Route (authenticated only) */}

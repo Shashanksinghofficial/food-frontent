@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
+using Foodime_Backend.Models;
 namespace Foodime_Backend.DTOs.Auth
 {
     public class RegisterDto
@@ -29,5 +29,8 @@ namespace Foodime_Backend.DTOs.Auth
         [Required]
         [MinLength(6)]
         public string Password { get; set; } = null!;
+
+        [Required]
+        public User.UserRole Role { get; set; }
     }
 }

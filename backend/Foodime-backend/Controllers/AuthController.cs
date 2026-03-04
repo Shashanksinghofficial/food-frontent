@@ -9,7 +9,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
-using static Foodime_Backend.Models.User;
+using AppUser = Foodime_Backend.Models.User;
 
 namespace Foodime_Backend.Controllers
 {
@@ -32,7 +32,10 @@ namespace Foodime_Backend.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-
+            if (dto.Role == AppUser.UserRole.Admin)
+            {
+                return BadRequest("Admin role cannot be assigned.");
+            }
             var username = dto.Username.Trim();
             var email = dto.Email.Trim().ToLower();
             var phone = dto.Phone.Trim();
@@ -54,6 +57,7 @@ namespace Foodime_Backend.Controllers
             if (await _context.Users.AnyAsync(u => u.Phone == phone))
                 return BadRequest(new { message = "Phone already exists" });
 
+
             var user = new User
             {
                 FirstName = dto.FirstName.Trim(),
@@ -62,7 +66,7 @@ namespace Foodime_Backend.Controllers
                 Email = email,
                 Phone = phone,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                Role = UserRole.Admin
+                Role = dto.Role
             };
 
             _context.Users.Add(user);

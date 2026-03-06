@@ -16,19 +16,29 @@ namespace Foodime_backend.Controllers
             _context = context;
         }
 
-        // ✅ GET: api/Products
+        // ✅ GET: api/products?category=2
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int? category)
         {
-            var products = await _context.Products
+            var query = _context.Products
                 .Include(p => p.Category)
                 .Where(p => p.IsAvailable)
+                .AsQueryable();
+
+            // 🔹 Category Filter
+            if (category.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == category.Value);
+            }
+
+            var products = await query
                 .Select(p => new
                 {
                     p.Id,
                     p.Name,
                     p.Price,
                     p.ImageUrl,
+                    p.CategoryId,
                     Category = p.Category!.Name
                 })
                 .ToListAsync();
@@ -36,7 +46,7 @@ namespace Foodime_backend.Controllers
             return Ok(products);
         }
 
-        // ✅ POST: api/Products
+        // ✅ POST: api/products
         [HttpPost]
         public async Task<IActionResult> AddProduct(Product product)
         {
@@ -45,7 +55,7 @@ namespace Foodime_backend.Controllers
             return Ok(product);
         }
 
-        // ✅ PUT: api/Products/1
+        // ✅ PUT: api/products/1
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProduct(int id, Product updatedProduct)
         {
@@ -65,7 +75,7 @@ namespace Foodime_backend.Controllers
             return Ok(product);
         }
 
-        // ✅ DELETE: api/Products/1
+        // ✅ DELETE: api/products/1
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {

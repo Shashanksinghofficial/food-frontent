@@ -3,7 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Plus, Minus, Trash2, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./ShopPage.css";
-
+const SkeletonProduct = () => (
+  <div className="product-card skeleton">
+    <div className="skeleton-img"></div>
+    <div className="product-info">
+      <div className="skeleton-text"></div>
+      <div className="skeleton-text small"></div>
+      <div className="skeleton-cart"></div>
+    </div>
+  </div>
+);
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -145,13 +154,18 @@ const CartPage = () => {
     .reduce((acc, item) => acc + item.price * item.quantity, 0)
     .toFixed(2);
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="shop-loading">
-        <div className="spinner"></div>
-        <span>Loading cart...</span>
+      <div className="shop-page">
+        <h1 className="shop-title">🛒 My Cart</h1>
+        <div className="products-grid">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <SkeletonProduct key={idx} />
+          ))}
+        </div>
       </div>
     );
+  }
 
   if (error)
     return (

@@ -2,6 +2,17 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./WishlistPage.css";
 
+const SkeletonProduct = () => (
+  <div className="wishlist-card skeleton">
+    <div className="skeleton-img"></div>
+    <div className="product-info">
+      <div className="skeleton-text"></div>
+      <div className="skeleton-text small"></div>
+      <div className="skeleton-cart"></div>
+    </div>
+  </div>
+);
+
 const WishlistPage = () => {
   const navigate = useNavigate();
   const [wishlistProducts, setWishlistProducts] = useState([]);
@@ -43,11 +54,8 @@ const WishlistPage = () => {
 
   const removeFromWishlist = (id) => {
     const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
-
     const updated = wishlist.filter((item) => item !== id);
-
     localStorage.setItem("wishlist", JSON.stringify(updated));
-
     setWishlistProducts((prev) => prev.filter((product) => product.id !== id));
   };
 
@@ -55,7 +63,15 @@ const WishlistPage = () => {
     loadWishlistProducts();
   }, []);
 
-  if (loading) return <h2 className="center">Loading Wishlist...</h2>;
+  if (loading)
+    return (
+      <div className="wishlist-grid">
+        {/* Show 6 skeleton cards as placeholders */}
+        {Array.from({ length: 6 }).map((_, index) => (
+          <SkeletonProduct key={index} />
+        ))}
+      </div>
+    );
 
   return (
     <div className="wishlist-container">
@@ -81,7 +97,6 @@ const WishlistPage = () => {
                 alt={product.name}
                 onClick={() => navigate(`/product/${product.id}`)}
               />
-
               <h3>{product.name}</h3>
               <p>₹{product.price}</p>
 

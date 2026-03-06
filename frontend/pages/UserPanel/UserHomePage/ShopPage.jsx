@@ -23,6 +23,7 @@ const ShopPage = () => {
   const [toastQueue, setToastQueue] = useState([]);
   const [categories, setCategories] = useState([{ name: "All", slug: "all" }]);
   const [cartToast, setCartToast] = useState({ show: false, message: "" });
+  const [categoryCache, setCategoryCache] = useState({});
 
   // 🔹 Filter States
   const [filterModal, setFilterModal] = useState(false);
@@ -36,10 +37,17 @@ const ShopPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const jwtToken = localStorage.getItem("jwtToken");
-
-  const activeCategoryFromURL = searchParams.get("category") || "all";
-  const [activeCategory, setActiveCategory] = useState(activeCategoryFromURL);
-
+  const [activeCategory, setActiveCategory] = useState("all");
+  const SkeletonProduct = () => (
+    <div className="product-card skeleton">
+      <div className="skeleton-img"></div>
+      <div className="product-info">
+        <div className="skeleton-text"></div>
+        <div className="skeleton-text small"></div>
+        <div className="skeleton-cart"></div>
+      </div>
+    </div>
+  );
   // Update URL param on category change
   useEffect(() => {
     if (activeCategory === "all") {
@@ -78,10 +86,10 @@ const ShopPage = () => {
         if (!res.ok) throw new Error("Failed to fetch categories");
 
         const data = await res.json();
-
         const catData = data.map((c) => ({
+          id: c.id,
           name: c.name?.trim() || "",
-          slug: c.slug,
+          slug: c.slug || c.id, // fallback
         }));
 
         setCategories([{ name: "All", slug: "all" }, ...catData]);
@@ -102,10 +110,17 @@ const ShopPage = () => {
     }
 
     const fetchProducts = async () => {
-      setLoading(true);
       setError(null);
 
       try {
+        // ✅ Cache check
+        if (categoryCache[activeCategory]) {
+          setProducts(categoryCache[activeCategory]);
+          return;
+        }
+
+        setLoading(true);
+
         let url = `${API_BASE}/products`;
 
         if (activeCategory && activeCategory !== "all") {
@@ -132,7 +147,14 @@ const ShopPage = () => {
         }
 
         const data = await res.json();
+
         setProducts(data);
+
+        // ✅ cache save
+        setCategoryCache((prev) => ({
+          ...prev,
+          [activeCategory]: data,
+        }));
       } catch (err) {
         setError(err.message || "Something went wrong.");
       } finally {
@@ -207,14 +229,6 @@ const ShopPage = () => {
 
   const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
 
-  if (loading)
-    return (
-      <div className="shop-loading">
-        <div className="spinner"></div>
-        <span>Loading products...</span>
-      </div>
-    );
-
   if (error) return <div className="shop-error">{error}</div>;
 
   return (
@@ -267,105 +281,111 @@ const ShopPage = () => {
       {/* Products grid */}
       <div className="products-grid">
         <AnimatePresence>
-          {products
-            .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-            .filter((p) => {
-              const price = parseFloat(p.price) || 0;
-              return (
-                price >= selectedFilters.price[0] &&
-                price <= selectedFilters.price[1]
-              );
-            })
-            .filter((p) => {
-              if (selectedFilters.rating.length === 0) return true;
-              const avgRating = parseFloat(p.average_rating) || 0;
-              return selectedFilters.rating.some(
-                (r) => Math.floor(avgRating) === r,
-              );
-            })
-            .map((product) => (
-              <motion.div
-                key={product.id}
-                className="product-card"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                onClick={() => navigate(`/product/${product.id}`)}
-              >
-                {product.imageUrl && (
-                  <motion.img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="product-image"
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                )}
-
-                <button
-                  className={`wishlist-btn ${
-                    wishlist.includes(product.id) ? "active" : ""
-                  }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleWishlist(product);
-                  }}
-                >
-                  <Heart
-                    size={22}
-                    fill={wishlist.includes(product.id) ? "red" : "white"}
-                    color={wishlist.includes(product.id) ? "red" : "black"}
-                  />
-                </button>
-
-                <div className="product-info">
-                  <h3 className="product-name">{product.name}</h3>
-                  <p className="product-price">₹{product.price || "N/A"}</p>
-
-                  <div className="cart-actions">
-                    {cart[product.id] ? (
-                      <motion.div
-                        className="quantity-controls"
-                        initial={{ scale: 0.9 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeFromCart(product);
-                          }}
-                        >
-                          <Minus size={18} />
-                        </button>
-                        <span>{cart[product.id]}</span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addToCart(product);
-                          }}
-                        >
-                          <Plus size={18} />
-                        </button>
-                      </motion.div>
-                    ) : (
-                      <motion.button
-                        className="add-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCart(product);
-                        }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        Add
-                      </motion.button>
+          {loading
+            ? Array(8)
+                .fill()
+                .map((_, i) => <SkeletonProduct key={i} />)
+            : products
+                .filter((p) =>
+                  p.name.toLowerCase().includes(search.toLowerCase()),
+                )
+                .filter((p) => {
+                  const price = parseFloat(p.price) || 0;
+                  return (
+                    price >= selectedFilters.price[0] &&
+                    price <= selectedFilters.price[1]
+                  );
+                })
+                .filter((p) => {
+                  if (selectedFilters.rating.length === 0) return true;
+                  const avgRating = parseFloat(p.average_rating) || 0;
+                  return selectedFilters.rating.some(
+                    (r) => Math.floor(avgRating) === r,
+                  );
+                })
+                .map((product) => (
+                  <motion.div
+                    key={product.id}
+                    className="product-card"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    onClick={() => navigate(`/product/${product.id}`)}
+                  >
+                    {product.imageUrl && (
+                      <motion.img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="product-image"
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ duration: 0.3 }}
+                      />
                     )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+
+                    <button
+                      className={`wishlist-btn ${
+                        wishlist.includes(product.id) ? "active" : ""
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleWishlist(product);
+                      }}
+                    >
+                      <Heart
+                        size={22}
+                        fill={wishlist.includes(product.id) ? "red" : "white"}
+                        color={wishlist.includes(product.id) ? "red" : "black"}
+                      />
+                    </button>
+
+                    <div className="product-info">
+                      <h3 className="product-name">{product.name}</h3>
+                      <p className="product-price">₹{product.price || "N/A"}</p>
+
+                      <div className="cart-actions">
+                        {cart[product.id] ? (
+                          <motion.div
+                            className="quantity-controls"
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeFromCart(product);
+                              }}
+                            >
+                              <Minus size={18} />
+                            </button>
+                            <span>{cart[product.id]}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addToCart(product);
+                              }}
+                            >
+                              <Plus size={18} />
+                            </button>
+                          </motion.div>
+                        ) : (
+                          <motion.button
+                            className="add-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCart(product);
+                            }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            Add
+                          </motion.button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
         </AnimatePresence>
       </div>
 

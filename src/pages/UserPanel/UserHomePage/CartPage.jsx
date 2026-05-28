@@ -1,20 +1,27 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Plus, Minus, Trash2, CheckCircle } from "lucide-react";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
-import "./ShopPage.css"; // Same CSS as ShopPage
+import { useCart } from "../../../context/useCart";
+import "./ShopPage.css";
 
 const CartPage = () => {
-  const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [toastQueue, setToastQueue] = useState([]);
-  const [updatingItemId, setUpdatingItemId] = useState(null); // for loader
   const navigate = useNavigate();
-  const jwtToken = localStorage.getItem("jwtToken");
-  const debounceTimers = useRef({});
+  const {
+    getCartItems,
+    getCartTotal,
+    getCartCount,
+    addToCart,
+    removeFromCart,
+    deleteFromCart,
+  } = useCart();
 
-  // Toast helper
+  const [toastQueue, setToastQueue] = useState([]);
+  const [apiItems, setApiItems] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const jwtToken = localStorage.getItem("jwtToken");
+
   const showToast = (msg, type = "black") => {
     const id = Date.now();
     setToastQueue((prev) => [...prev, { id, msg, type }]);
@@ -23,17 +30,13 @@ const CartPage = () => {
     }, 2000);
   };
 
-  // Fetch cart data
   useEffect(() => {
     if (!jwtToken) {
-      setError("JWT token missing. Please login.");
-      navigate("/login");
+      setLoading(false);
       return;
     }
 
     const fetchCart = async () => {
-      setLoading(true);
-      setError(null);
       try {
         const res = await fetch(
           "http://localhost/foodime/wp-json/foodime/v1/cart",
@@ -45,80 +48,48 @@ const CartPage = () => {
             },
           }
         );
-        if (!res.ok) throw new Error(`Failed to fetch cart: ${res.status}`);
-        const data = await res.json();
-        setCartItems(data.items || []);
-      } catch (err) {
-        setError(err.message || "Something went wrong.");
+        if (res.ok) {
+          const data = await res.json();
+          setApiItems(data.items || []);
+        }
+      } catch {
+        console.log("API cart unavailable, using local cart");
       } finally {
         setLoading(false);
       }
     };
 
     fetchCart();
-  }, [jwtToken, navigate]);
+  }, [jwtToken]);
 
-  // Update quantity with debounce
-  const updateQuantity = (item, qty) => {
-    if (qty < 1) return;
+  const cartItems = apiItems || getCartItems();
+  const totalItems = apiItems
+    ? cartItems.reduce((acc, item) => acc + item.quantity, 0)
+    : getCartCount();
+  const totalPrice = apiItems
+    ? cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)
+    : getCartTotal().toFixed(2);
 
-    if (debounceTimers.current[item.id])
-      clearTimeout(debounceTimers.current[item.id]);
-
-    debounceTimers.current[item.id] = setTimeout(async () => {
-      setUpdatingItemId(item.id);
-      try {
-        const res = await fetch(
-          `http://localhost/foodime/wp-json/foodime/v1/cart/${item.id}`,
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `Bearer ${jwtToken}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ quantity: qty }),
-          }
-        );
-        if (!res.ok) throw new Error("Failed to update quantity");
-        const updatedCart = await res.json();
-        setCartItems(updatedCart.items || []);
-        showToast(`${item.name} quantity updated`);
-      } catch (err) {
-        showToast(err.message);
-      } finally {
-        setUpdatingItemId(null);
-      }
-    }, 300); // 300ms debounce
-  };
-
-  const removeItem = async (item) => {
-    setUpdatingItemId(item.id);
-    try {
-      const res = await fetch(
-        `http://localhost/foodime/wp-json/foodime/v1/cart/${item.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (!res.ok) throw new Error("Failed to remove item");
-      const updatedCart = await res.json();
-      setCartItems(updatedCart.items || []);
-      showToast(`${item.name} removed from cart`);
-    } catch (err) {
-      showToast(err.message);
-    } finally {
-      setUpdatingItemId(null);
+  const handleIncrease = (item) => {
+    if (!apiItems) {
+      addToCart(item);
+      showToast(`${item.name} quantity updated`);
     }
   };
 
-  const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const totalPrice = cartItems
-    .reduce((acc, item) => acc + item.price * item.quantity, 0)
-    .toFixed(2);
+  const handleDecrease = (item) => {
+    if (!apiItems) {
+      removeFromCart(item.id);
+      showToast(`${item.name} quantity updated`);
+    }
+  };
+
+  const handleRemove = (item) => {
+    if (!apiItems) {
+      deleteFromCart(item.id);
+      showToast(`${item.name} removed from cart`);
+    }
+  };
 
   if (loading)
     return (
@@ -128,16 +99,28 @@ const CartPage = () => {
       </div>
     );
 
-  if (error) return <div className="shop-error">{error}</div>;
-
   return (
     <div className="shop-page">
-      <h1 className="shop-title">🛒 My Cart</h1>
+      <h1 className="shop-title">My Cart</h1>
 
       {cartItems.length === 0 ? (
-        <p style={{ textAlign: "center", marginTop: "40px" }}>
-          Your cart is empty.
-        </p>
+        <div style={{ textAlign: "center", marginTop: "40px" }}>
+          <p>Your cart is empty.</p>
+          <button
+            style={{
+              background: "#ff6b35",
+              color: "white",
+              border: "none",
+              padding: "12px 24px",
+              borderRadius: "8px",
+              cursor: "pointer",
+              marginTop: "16px",
+            }}
+            onClick={() => navigate("/homepage")}
+          >
+            Browse Menu
+          </button>
+        </div>
       ) : (
         <div className="products-grid">
           <AnimatePresence>
@@ -150,16 +133,19 @@ const CartPage = () => {
                 exit={{ opacity: 0, y: 20 }}
                 whileHover={{ scale: 1.03 }}
               >
-                {item.image && (
+                {(item.image || (item.images && item.images.length > 0)) && (
                   <img
-                    src={item.image}
+                    src={item.image || item.images[0].src}
                     alt={item.name}
                     className="product-image"
                   />
                 )}
                 <div className="product-info">
                   <h3 className="product-name">{item.name}</h3>
-                  <p className="product-price">₹{item.price}</p>
+                  <p className="product-price">
+                    {"\u20B9"}
+                    {item.price}
+                  </p>
 
                   <div className="cart-actions">
                     <motion.div
@@ -167,23 +153,16 @@ const CartPage = () => {
                       initial={{ scale: 0.9 }}
                       animate={{ scale: 1 }}
                     >
-                      <button
-                        disabled={updatingItemId === item.id}
-                        onClick={() => updateQuantity(item, item.quantity - 1)}
-                      >
+                      <button onClick={() => handleDecrease(item)}>
                         <Minus size={18} />
                       </button>
                       <span>{item.quantity}</span>
-                      <button
-                        disabled={updatingItemId === item.id}
-                        onClick={() => updateQuantity(item, item.quantity + 1)}
-                      >
+                      <button onClick={() => handleIncrease(item)}>
                         <Plus size={18} />
                       </button>
                       <button
                         style={{ marginLeft: "8px" }}
-                        disabled={updatingItemId === item.id}
-                        onClick={() => removeItem(item)}
+                        onClick={() => handleRemove(item)}
                       >
                         <Trash2 size={18} />
                       </button>
@@ -196,7 +175,6 @@ const CartPage = () => {
         </div>
       )}
 
-      {/* Cart Summary */}
       {cartItems.length > 0 && (
         <motion.div
           className="cart-summary"
@@ -206,7 +184,8 @@ const CartPage = () => {
         >
           <ShoppingCart size={20} />
           <span>
-            {totalItems} items | ₹{totalPrice}
+            {totalItems} items | {"\u20B9"}
+            {totalPrice}
           </span>
           <button
             className="checkout-btn"
@@ -217,7 +196,6 @@ const CartPage = () => {
         </motion.div>
       )}
 
-      {/* Toast Notifications */}
       <AnimatePresence>
         {toastQueue.map((toast) => (
           <motion.div

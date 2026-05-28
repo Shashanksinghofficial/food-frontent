@@ -14,12 +14,19 @@ import Login from "./pages/UserPanel/LoginSignupPage/Login";
 import ShopPage from "./pages/UserPanel/UserHomePage/ShopPage";
 import CartPage from "./pages/UserPanel/UserHomePage/CartPage";
 import AccountPage from "./pages/UserPanel/UserHomePage/AccountPage";
-import ProductDetail from "./pages/UserPanel/ProductPage/ProductDetail"; // ✅ fixed
+import ProductDetail from "./pages/UserPanel/ProductPage/ProductDetail";
+import Checkout from "./pages/UserPanel/CheckoutPage/Checkout";
+import OrderConfirmation from "./pages/UserPanel/OrderConfirmationPage/OrderConfirmation";
+import Wishlist from "./pages/UserPanel/WishlistPage/Wishlist";
+import Orders from "./pages/UserPanel/OrdersPage/Orders";
 
 // Delivery Panel Pages
 import DeliveryLogin from "./pages/DeliveryPanel/DeliveryLogin";
 import DeliveryPanel from "./pages/DeliveryPanel/DeliveryPanel";
 import DeliveryRegister from "./pages/DeliveryPanel/DeliveryRegister";
+
+// Other Pages
+import NotFound from "./pages/NotFoundPage/NotFound";
 
 function App() {
   // Simple delivery user authentication check
@@ -41,11 +48,18 @@ function App() {
         <Route path="/homepage" element={<ShopPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/account" element={<AccountPage />} />
-        <Route path="/product/:id" element={<ProductDetail />} />{" "}
-        {/* ✅ Added */}
+        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/orders" element={<Orders />} />
       </Route>
 
-      {/* 3. Delivery Panel Route (authenticated only) */}
+      {/* 3. Checkout & Order Confirmation (with Layout) */}
+      <Route element={<Layout />}>
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order-confirmation" element={<OrderConfirmation />} />
+      </Route>
+
+      {/* 4. Delivery Panel Route (authenticated only) */}
       <Route
         path="/delivery-panel"
         element={
@@ -57,8 +71,8 @@ function App() {
         }
       />
 
-      {/* 4. Catch-all route */}
-      <Route path="*" element={<div>404 - Page Not Found (Foodime App)</div>} />
+      {/* 5. Catch-all route */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

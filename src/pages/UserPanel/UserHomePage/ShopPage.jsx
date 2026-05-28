@@ -11,18 +11,25 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "../../../context/useCart";
 import "./ShopPage.css";
 
 const ShopPage = () => {
   const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
-  const [wishlist, setWishlist] = useState([]);
   const [toastQueue, setToastQueue] = useState([]);
   const [categories, setCategories] = useState([{ name: "All", slug: "all" }]);
   const [cartToast, setCartToast] = useState({ show: false, message: "" });
+
+  const {
+    cart,
+    addToCart: contextAddToCart,
+    removeFromCart: contextRemoveFromCart,
+    toggleWishlist: contextToggleWishlist,
+    isInWishlist,
+  } = useCart();
 
   // 🔹 Filter States
   const [filterModal, setFilterModal] = useState(false);
@@ -49,14 +56,7 @@ const ShopPage = () => {
     setSearchParams(searchParams);
   }, [activeCategory, searchParams, setSearchParams]);
 
-  useEffect(() => {
-    const savedWishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
-    setWishlist(savedWishlist);
-  }, []);
 
-  useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
 
   useEffect(() => {
     if (!jwtToken) return;
@@ -138,11 +138,10 @@ const ShopPage = () => {
   }, [jwtToken, navigate, activeCategory]);
 
   const toggleWishlist = (product) => {
-    if (wishlist.includes(product.id)) {
-      setWishlist(wishlist.filter((id) => id !== product.id));
+    contextToggleWishlist(product.id);
+    if (isInWishlist(product.id)) {
       showToast(`${product.name} removed from wishlist`);
     } else {
-      setWishlist([...wishlist, product.id]);
       showToast(`${product.name} added to wishlist`);
     }
   };
@@ -161,25 +160,14 @@ const ShopPage = () => {
   };
 
   const addToCart = (product) => {
-    setCart((prev) => ({
-      ...prev,
-      [product.id]: (prev[product.id] || 0) + 1,
-    }));
+    contextAddToCart(product);
     showCartSummary(`${product.name} added to cart`);
   };
 
   const removeFromCart = (product) => {
-    setCart((prev) => {
-      if (!prev[product.id]) return prev;
-      const updated = { ...prev };
-      updated[product.id] -= 1;
-      if (updated[product.id] <= 0) delete updated[product.id];
-      return updated;
-    });
+    contextRemoveFromCart(product.id);
     showCartSummary(`${product.name} removed from cart`);
   };
-
-  const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
 
   if (loading)
     return (
@@ -287,17 +275,17 @@ const ShopPage = () => {
 
                 <button
                   className={`wishlist-btn ${
-                    wishlist.includes(product.id) ? "active" : ""
+                    isInWishlist(product.id) ? "active" : ""
                   }`}
                   onClick={(e) => {
-                    e.stopPropagation(); // card click ko rokta hai
+                    e.stopPropagation();
                     toggleWishlist(product);
                   }}
                 >
                   <Heart
                     size={22}
-                    fill={wishlist.includes(product.id) ? "red" : "white"}
-                    color={wishlist.includes(product.id) ? "red" : "black"}
+                    fill={isInWishlist(product.id) ? "red" : "white"}
+                    color={isInWishlist(product.id) ? "red" : "black"}
                   />
                 </button>
 
@@ -306,7 +294,7 @@ const ShopPage = () => {
                   <p className="product-price">₹{product.price || "N/A"}</p>
 
                   <div className="cart-actions">
-                    {cart[product.id] ? (
+                    {cart[product.id]?.quantity ? (
                       <motion.div
                         className="quantity-controls"
                         initial={{ scale: 0.9 }}
@@ -321,7 +309,7 @@ const ShopPage = () => {
                         >
                           <Minus size={18} />
                         </button>
-                        <span>{cart[product.id]}</span>
+                        <span>{cart[product.id].quantity}</span>
                         <button
                           onClick={(e) => {
                             e.stopPropagation(); // card click ko rokta hai

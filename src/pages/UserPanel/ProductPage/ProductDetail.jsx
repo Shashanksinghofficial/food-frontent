@@ -9,6 +9,7 @@ import {
   Star,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useCart } from "../../../context/useCart";
 import "./ProductDetail.css";
 
 const ProductPage = () => {
@@ -21,6 +22,7 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const jwtToken = localStorage.getItem("jwtToken");
+  const { addToCart } = useCart();
 
   useEffect(() => {
     if (!jwtToken) {
@@ -71,12 +73,17 @@ const ProductPage = () => {
   };
 
   const handleAddToCart = () => {
-    alert(`
-✅ ${product?.name} Added to Cart!
-🍔 Size: ${selectedSize || "Default"}
-🍕 Toppings: ${selectedToppings.join(", ") || "None"}
-🧾 Quantity: ${quantity}
-    `);
+    for (let i = 0; i < quantity; i++) {
+      addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        images: product.images,
+        selectedSize,
+        selectedToppings,
+      });
+    }
+    navigate("/cart");
   };
 
   return (

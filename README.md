@@ -1,4 +1,4 @@
-CREATE A NEW REACT + VITE WEBSITE PROCESS...<BR>
+<CODE>CREATE A NEW REACT + VITE WEBSITE PROCESS...<BR>
 open terminal - Y:
 create folder - mkdir foodime,
 open folder - cd foodime,
@@ -15,4 +15,4 @@ install react router dom in Y:\Foodime\Foodime-frontent
 npm install react router dom
 
 install library using this command in foodime-frontent
-npm install typed.js react-icons lucide-react framer-motion
+npm install typed.js react-icons lucide-react framer-motion<CODE>

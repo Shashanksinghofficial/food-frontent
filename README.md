@@ -1,4 +1,4 @@
-CREATE A NEW REACT + VITE WEBSITE PROCESS...
+CREATE A NEW REACT + VITE WEBSITE PROCESS...<BR>
 open terminal - Y:
 create folder - mkdir foodime,
 open folder - cd foodime,
